@@ -1,0 +1,41 @@
+name: Pipeline Completo
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependências
+        run: |
+          pip install pytest mysql-connector-python
+
+      - name: Instalar MySQL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mysql-server
+          sudo systemctl start mysql
+
+      - name: Configurar banco
+        run: |
+          sudo mysql -e "CREATE DATABASE estoque_frutas;"
+          sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '1234';"
+          sudo mysql -e "FLUSH PRIVILEGES;"
+
+      - name: Criar tabelas
+        run: |
+          mysql -u root -p1234 estoque_frutas < db_alimentos.sql
+
+      - name: Rodar testes
+        run: pytest
