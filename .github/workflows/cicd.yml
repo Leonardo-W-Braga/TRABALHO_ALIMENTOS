@@ -25,11 +25,26 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y mysql-server
+
+      - name: Iniciar MySQL
+        run: |
           sudo systemctl start mysql
 
-      - name: Configurar MySQL root
+      # ⬇️ PASSO QUE FALTAVA
+      - name: Esperar MySQL iniciar
         run: |
-          sudo mysql <<EOF
+          echo "Esperando MySQL subir..."
+          for i in {1..30}; do
+            if sudo mysqladmin ping &> /dev/null; then
+              echo "MySQL pronto!"
+              break
+            fi
+            sleep 2
+          done
+
+      - name: Configurar root
+        run: |
+          sudo mysql --user=root <<EOF
           ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '1234';
           FLUSH PRIVILEGES;
           EOF
