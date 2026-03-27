@@ -22,8 +22,14 @@ jobs:
       - name: Iniciar MySQL
         run: sudo service mysql start
 
-      # ⭐ CORREÇÃO DO BUG DO ROOT (ESSA LINHA SALVA A VIDA)
-      - name: Corrigir autenticação do root
+      # 🔵 esperar MySQL iniciar completamente
+      - name: Aguardar MySQL
+        run: |
+          sudo systemctl start mysql
+          sleep 5
+
+      # 🔵 configurar senha do root (MySQL do Ubuntu vem sem senha inicialmente)
+      - name: Configurar senha do root
         run: |
           sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';"
           sudo mysql -uroot -proot -e "FLUSH PRIVILEGES;"
