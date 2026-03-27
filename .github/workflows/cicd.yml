@@ -6,35 +6,56 @@ jobs:
   pipeline:
     runs-on: ubuntu-latest
 
+    # 🔵 MySQL rodando como serviço (container oficial)
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: estoque_frutas
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
-      - name: Baixar código
+      # 📥 Baixar repositório
+      - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Instalar Python
+      # 🐍 Instalar Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
-      - name: Instalar dependências Python
+      # 📦 Instalar dependências
+      - name: Instalar libs
         run: pip install pytest mysql-connector-python
 
-      # ⭐ usar MySQL que já existe no runnerr
-      - name: Iniciar MySQL
-        run: sudo /etc/init.d/mysql start
+      # ⏳ Esperar MySQL ficar pronto
+      - name: Aguardar MySQL iniciar
+        run: |
+          echo "Esperando MySQL subir..."
+          sleep 20
 
-      - name: Criar banco e usuário
+      # 👤 Criar usuário da aplicação
+      - name: Criar usuário MySQL
         run: |
-      - name: Criar banco e usuário
-        run: |
-          sudo mysql <<EOF
-            CREATE DATABASE IF NOT EXISTS estoque_frutas;
-            CREATE USER IF NOT EXISTS 'appuser'@'localhost' IDENTIFIED BY '1234';
-            GRANT ALL PRIVILEGES ON estoque_frutas.* TO 'appuser'@'localhost';
-            FLUSH PRIVILEGES;
+          mysql -h 127.0.0.1 -P 3306 -u root -proot <<EOF
+          CREATE USER IF NOT EXISTS 'appuser'@'%' IDENTIFIED BY '1234';
+          GRANT ALL PRIVILEGES ON estoque_frutas.* TO 'appuser'@'%';
+          FLUSH PRIVILEGES;
           EOF
+
+      # 🗄️ Criar tabelas via SQL do projeto
       - name: Criar tabelas
         run: |
-          mysql -u appuser -p1234 estoque_frutas < db_alimentos.sql
+          mysql -h 127.0.0.1 -P 3306 -u appuser -p1234 estoque_frutas < db_alimentos.sql
 
-      - name: Rodar testes
+      # 🧪 Rodar testes
+      - name: Executar testes
         run: pytest
