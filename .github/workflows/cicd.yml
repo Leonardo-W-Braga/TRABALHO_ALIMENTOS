@@ -6,16 +6,6 @@ jobs:
   pipeline:
     runs-on: ubuntu-latest
 
-    services:
-      mariadb:
-        image: mariadb:10.11
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: estoque_frutas
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
     steps:
       - name: Baixar código
         uses: actions/checkout@v4
@@ -28,18 +18,31 @@ jobs:
       - name: Instalar dependências Python
         run: pip install pytest mysql-connector-python
 
-      - name: Aguardar MySQL
-        run: sleep 10
-
-      - name: Criar usuário appuser
+      - name: Instalar MySQL 8.0
         run: |
-          mysql -h 127.0.0.1 -uroot -proot -e "CREATE USER IF NOT EXISTS 'appuser'@'%' IDENTIFIED BY '1234';"
-          mysql -h 127.0.0.1 -uroot -proot -e "GRANT ALL PRIVILEGES ON estoque_frutas.* TO 'appuser'@'%';"
-          mysql -h 127.0.0.1 -uroot -proot -e "FLUSH PRIVILEGES;"
+          sudo apt-get update
+          # Adicionar repositório oficial do MySQL
+          sudo apt-get install -y wget
+          wget https://dev.mysql.com/get/mysql-apt-config_0.8.24-1_all.deb
+          sudo dpkg -i mysql-apt-config_0.8.24-1_all.deb
+          sudo apt-get update
+          sudo apt-get install -y mysql-server
+          sudo service mysql start
+          sleep 5
+
+      - name: Configurar MySQL
+        run: |
+          sudo mysql -e "CREATE DATABASE IF NOT EXISTS estoque_frutas;"
+          sudo mysql -e "CREATE USER IF NOT EXISTS 'appuser'@'localhost' IDENTIFIED BY '1234';"
+          sudo mysql -e "GRANT ALL PRIVILEGES ON estoque_frutas.* TO 'appuser'@'localhost';"
+          sudo mysql -e "FLUSH PRIVILEGES;"
+
+      - name: Verificar versão do MySQL
+        run: mysql --version
 
       - name: Criar tabelas
         run: |
-          mysql -h 127.0.0.1 -uappuser -p1234 estoque_frutas < db_alimentos.sql
+          mysql -uappuser -p1234 estoque_frutas < db_alimentos.sql
 
       - name: Rodar testes
         run: pytest
