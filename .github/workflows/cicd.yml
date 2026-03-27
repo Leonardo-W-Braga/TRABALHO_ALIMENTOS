@@ -18,7 +18,7 @@ jobs:
       - name: Instalar dependências Python
         run: pip install pytest mysql-connector-python
 
-      # ⭐ usar MySQL que já existe no runner
+      # ⭐ usar MySQL que já existe no runnerr
       - name: Iniciar MySQL
         run: sudo /etc/init.d/mysql start
 
