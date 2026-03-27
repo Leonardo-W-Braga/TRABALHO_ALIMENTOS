@@ -6,6 +6,16 @@ jobs:
   pipeline:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: estoque_frutas
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
       - name: Baixar código
         uses: actions/checkout@v4
@@ -18,29 +28,18 @@ jobs:
       - name: Instalar dependências Python
         run: pip install pytest mysql-connector-python
 
-      # 🔵 iniciar mysql do próprio runner
-      - name: Iniciar MySQL
-        run: sudo service mysql start
-
-      # 🔵 aguardar mysql iniciar
       - name: Aguardar MySQL
-        run: sleep 5
+        run: sleep 10
 
-      # 🔵 criar banco e usuário (usando sudo sem senha - auth_socket)
-      - name: Criar banco e usuário
+      - name: Criar usuário appuser
         run: |
-          sudo mysql <<EOF
-          CREATE DATABASE IF NOT EXISTS estoque_frutas;
-          CREATE USER IF NOT EXISTS 'appuser'@'localhost' IDENTIFIED BY '1234';
-          GRANT ALL PRIVILEGES ON estoque_frutas.* TO 'appuser'@'localhost';
-          FLUSH PRIVILEGES;
-          EOF
+          mysql -h 127.0.0.1 -uroot -proot -e "CREATE USER IF NOT EXISTS 'appuser'@'%' IDENTIFIED BY '1234';"
+          mysql -h 127.0.0.1 -uroot -proot -e "GRANT ALL PRIVILEGES ON estoque_frutas.* TO 'appuser'@'%';"
+          mysql -h 127.0.0.1 -uroot -proot -e "FLUSH PRIVILEGES;"
 
-      # 🔵 criar tabelas
       - name: Criar tabelas
         run: |
-          mysql -uappuser -p1234 estoque_frutas < db_alimentos.sql
+          mysql -h 127.0.0.1 -uappuser -p1234 estoque_frutas < db_alimentos.sql
 
-      # 🔵 rodar testes
       - name: Rodar testes
         run: pytest
