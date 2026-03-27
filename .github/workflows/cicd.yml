@@ -22,22 +22,14 @@ jobs:
       - name: Iniciar MySQL
         run: sudo service mysql start
 
-      # 🔵 esperar MySQL iniciar completamente
+      # 🔵 aguardar mysql iniciar
       - name: Aguardar MySQL
-        run: |
-          sudo systemctl start mysql
-          sleep 5
+        run: sleep 5
 
-      # 🔵 configurar senha do root (MySQL do Ubuntu vem sem senha inicialmente)
-      - name: Configurar senha do root
-        run: |
-          sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';"
-          sudo mysql -uroot -proot -e "FLUSH PRIVILEGES;"
-
-      # 🔵 criar banco e usuário da aplicação
+      # 🔵 criar banco e usuário (usando sudo sem senha - auth_socket)
       - name: Criar banco e usuário
         run: |
-          mysql -uroot -proot <<EOF
+          sudo mysql <<EOF
           CREATE DATABASE IF NOT EXISTS estoque_frutas;
           CREATE USER IF NOT EXISTS 'appuser'@'localhost' IDENTIFIED BY '1234';
           GRANT ALL PRIVILEGES ON estoque_frutas.* TO 'appuser'@'localhost';
