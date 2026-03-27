@@ -18,19 +18,20 @@ jobs:
       - name: Instalar dependências Python
         run: pip install pytest mysql-connector-python
 
-      # ⭐ usar MySQL que já existe no runnerrr
+      # ⭐ usar MySQL que já existe no runnerr
       - name: Iniciar MySQL
         run: sudo /etc/init.d/mysql start
 
       - name: Criar banco e usuário
         run: |
+      - name: Criar banco e usuário
+        run: |
           sudo mysql <<EOF
-          CREATE DATABASE IF NOT EXISTS estoque_frutas;
-          CREATE USER IF NOT EXISTS 'appuser'@'localhost' IDENTIFIED BY '1234';
-          GRANT ALL PRIVILEGES ON estoque_frutas.* TO 'appuser'@'localhost';
-          FLUSH PRIVILEGES;
+            CREATE DATABASE IF NOT EXISTS estoque_frutas;
+            CREATE USER IF NOT EXISTS 'appuser'@'localhost' IDENTIFIED BY '1234';
+            GRANT ALL PRIVILEGES ON estoque_frutas.* TO 'appuser'@'localhost';
+            FLUSH PRIVILEGES;
           EOF
-
       - name: Criar tabelas
         run: |
           mysql -u appuser -p1234 estoque_frutas < db_alimentos.sql
