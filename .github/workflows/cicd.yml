@@ -24,10 +24,12 @@ jobs:
 
       - name: Criar banco e usuário
         run: |
-          sudo mysql -e "CREATE DATABASE estoque_frutas;"
-          sudo mysql -e "CREATE USER 'appuser'@'localhost' IDENTIFIED BY '1234';"
-          sudo mysql -e "GRANT ALL PRIVILEGES ON estoque_frutas.* TO 'appuser'@'localhost';"
-          sudo mysql -e "FLUSH PRIVILEGES;"
+          sudo mysql <<EOF
+          CREATE DATABASE IF NOT EXISTS estoque_frutas;
+          CREATE USER IF NOT EXISTS 'appuser'@'localhost' IDENTIFIED BY '1234';
+          GRANT ALL PRIVILEGES ON estoque_frutas.* TO 'appuser'@'localhost';
+          FLUSH PRIVILEGES;
+          EOF
 
       - name: Criar tabelas
         run: |
