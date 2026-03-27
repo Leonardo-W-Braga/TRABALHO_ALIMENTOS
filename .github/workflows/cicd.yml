@@ -21,14 +21,12 @@ jobs:
       - name: Instalar MySQL 8.0
         run: |
           sudo apt-get update
-          # Adicionar repositório oficial do MySQL
-          sudo apt-get install -y wget
-          wget https://dev.mysql.com/get/mysql-apt-config_0.8.24-1_all.deb
-          sudo dpkg -i mysql-apt-config_0.8.24-1_all.deb
-          sudo apt-get update
-          sudo apt-get install -y mysql-server
+          sudo apt-get install -y mysql-server-8.0
           sudo service mysql start
           sleep 5
+
+      - name: Verificar versão do MySQL
+        run: mysql --version
 
       - name: Configurar MySQL
         run: |
@@ -36,9 +34,6 @@ jobs:
           sudo mysql -e "CREATE USER IF NOT EXISTS 'appuser'@'localhost' IDENTIFIED BY '1234';"
           sudo mysql -e "GRANT ALL PRIVILEGES ON estoque_frutas.* TO 'appuser'@'localhost';"
           sudo mysql -e "FLUSH PRIVILEGES;"
-
-      - name: Verificar versão do MySQL
-        run: mysql --version
 
       - name: Criar tabelas
         run: |
