@@ -46,7 +46,7 @@ jobs:
 
       - name: Rodar testes
         env:
-          # Variáveis de ambiente para o seu código Python ler (ex: os.getenv('DB_HOST'))
+          # Variáveis de ambiente para o seu código Python ler (ex: os.getenv('DB_HOST')))
           DB_HOST: 127.0.0.1
           DB_USER: appuser
           DB_PASS: 1234
