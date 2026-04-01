@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import MagicMock
 from src.app import obter_proximo_sec
 import mysql.connector
+from src.app import conectar
 
 # TESTES ANTIGOS (mantidos)
 def test_sec_primeiro_registro():
@@ -34,16 +35,20 @@ def test_conexao_mysql_actions():
     assert conn.is_connected()
     conn.close()
 
-def test_mostrar_tabela_no_actions():
-    conn = conectar_mysql_actions()
+
+def test_ver_tabela_actions():
+    """Mostra o conteúdo da tabela no GitHub Actions"""
+
+    conn = conectar()
+    assert conn is not None, "Falha ao conectar no banco"
+
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM frutas")
     resultados = cursor.fetchall()
 
-    print("\n========= CONTEUDO DA TABELA FRUTAS =========")
+    print("\n===== CONTEÚDO DA TABELA FRUTAS =====")
     for linha in resultados:
         print(linha)
-    print("=============================================\n")
 
     cursor.close()
     conn.close()

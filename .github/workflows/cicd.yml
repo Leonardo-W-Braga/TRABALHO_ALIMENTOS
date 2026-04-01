@@ -1,4 +1,4 @@
-name: Entrega Final - CI/CD MySQL & Python
+name: CI MySQL Python
 
 on: [push]
 
@@ -11,7 +11,6 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: meubanco
         ports:
           - 3306:3306
         options: >-
@@ -21,8 +20,7 @@ jobs:
           --health-retries=5
 
     steps:
-      # 🔽 PASSO QUE FALTAVA (BAIXAR O REPO)
-      - name: Baixar código do repositório
+      - name: Baixar repositório
         uses: actions/checkout@v4
 
       - name: Instalar Python
@@ -31,16 +29,13 @@ jobs:
           python-version: "3.11"
 
       - name: Instalar dependências
-        run: pip install mysql-connector-python
+        run: pip install mysql-connector-python pytest
 
-      # 🔽 esperar o MySQL iniciar
-      - name: Esperar MySQL iniciar
-        run: sleep 20
+      - name: Aguardar MySQL iniciar
+        run: sleep 25
 
-      # 🔽 IMPORTAR O BANCO (AGORA O ARQUIVO EXISTE)
-      - name: Criar tabelas no MySQL
-        run: mysql -h 127.0.0.1 -u root -proot meubanco < tabela.sql
+      - name: Criar banco + tabela + dados
+        run: mysql -h 127.0.0.1 -u root -proot < db_alimentos.sql
 
-      # 🔽 rodar o script python
-      - name: Rodar script Python
-        run: python app.py
+      - name: Rodar testes
+        run: pytest -s

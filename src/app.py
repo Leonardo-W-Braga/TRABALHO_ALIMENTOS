@@ -1,10 +1,9 @@
 import mysql.connector
 
 def conectar():
-    """Conecta ao banco MySQL"""
     try:
         conn = mysql.connector.connect(
-            host="localhost",
+            host="127.0.0.1",   # Actions usa IP, não localhost
             user="root",
             password="root",
             database="db_alimentos"

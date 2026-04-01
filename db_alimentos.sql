@@ -1,7 +1,7 @@
 CREATE DATABASE IF NOT EXISTS db_alimentos;
 USE db_alimentos;
 
-CREATE TABLE frutas (
+CREATE TABLE IF NOT EXISTS frutas (
     id INT NOT NULL AUTO_INCREMENT,
     sec CHAR(4),
     grupo_id CHAR(1) NOT NULL,
@@ -29,3 +29,10 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+-- 👇 DADOS INICIAIS PARA NÃO FICAR VAZIO NO ACTIONS
+INSERT INTO frutas (grupo_id, fruta) VALUES
+('A','Banana'),
+('A','Maça'),
+('B','Laranja'),
+('C','Abacaxi');
