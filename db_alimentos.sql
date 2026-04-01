@@ -30,9 +30,15 @@ END$$
 
 DELIMITER ;
 
--- 👇 DADOS INICIAIS PARA NÃO FICAR VAZIO NO ACTIONS
+-- 🔥 DADOS INICIAIS PARA O GITHUB ACTIONS NÃO FICAR VAZIO
+-- Esses inserts são ESSENCIAIS para testar o TRIGGER
+
 INSERT INTO frutas (grupo_id, fruta) VALUES
 ('A','Banana'),
-('A','Maça'),
+
+('A','Maçã'),
+('A','Maçã'),
+('A','Maçã'),
+
 ('B','Laranja'),
 ('C','Abacaxi');
