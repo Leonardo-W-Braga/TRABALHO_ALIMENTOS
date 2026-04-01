@@ -1,11 +1,31 @@
+CREATE DATABASE IF NOT EXISTS db_alimentos;
+USE db_alimentos;
+
 CREATE TABLE frutas (
     id INT NOT NULL AUTO_INCREMENT,
-    sec VARCHAR(10) NOT NULL,
+    sec CHAR(4),
     grupo_id CHAR(1) NOT NULL,
     fruta VARCHAR(100) NOT NULL,
     pais CHAR(2) NOT NULL DEFAULT 'BR',
     codigo_completo VARCHAR(20) AS (CONCAT(pais, sec, grupo_id)) STORED,
-    PRIMARY KEY (id),
-    UNIQUE KEY idx_codigo_unico (codigo_completo),
-    UNIQUE KEY idx_fruta_grupo_unico (fruta, grupo_id)
-)
+    PRIMARY KEY (id)
+);
+
+DELIMITER $$
+
+CREATE TRIGGER trg_sec_auto
+BEFORE INSERT ON frutas
+FOR EACH ROW
+BEGIN
+    DECLARE proximo INT;
+
+    SELECT COALESCE(MAX(CAST(sec AS UNSIGNED)),0) + 1
+    INTO proximo
+    FROM frutas
+    WHERE grupo_id = NEW.grupo_id
+      AND fruta = NEW.fruta;
+
+    SET NEW.sec = LPAD(proximo, 4, '0');
+END$$
+
+DELIMITER ;

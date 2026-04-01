@@ -1,54 +1,65 @@
 import pytest
 from unittest.mock import MagicMock
 from src.app import obter_proximo_sec
+import mysql.connector
 
+# TESTES ANTIGOS (mantidos)
 def test_sec_primeiro_registro():
-    """Testa quando não existe nenhum registro no grupo."""
-
     cursor_mock = MagicMock()
     cursor_mock.fetchone.return_value = (None,)
-
-    resultado = obter_proximo_sec(cursor_mock, "A")
-
-    assert resultado == "0001"
-
+    assert obter_proximo_sec(cursor_mock, "A") == "0001"
 
 def test_sec_incremento_normal():
-    """Testa incremento quando já existem registros."""
-
     cursor_mock = MagicMock()
     cursor_mock.fetchone.return_value = (5,)
-
-    resultado = obter_proximo_sec(cursor_mock, "A")
-
-    assert resultado == "0006"
-
+    assert obter_proximo_sec(cursor_mock, "A") == "0006"
 
 def test_sec_formatacao_quatro_digitos():
-    """Testa se o código mantém 4 dígitos."""
-
     cursor_mock = MagicMock()
     cursor_mock.fetchone.return_value = (9,)
+    assert obter_proximo_sec(cursor_mock, "A") == "0010"
 
-    resultado = obter_proximo_sec(cursor_mock, "A")
+# NOVOS TESTES (integração com MySQL)
+def conectar_mysql_actions():
+    return mysql.connector.connect(
+        host="127.0.0.1",
+        port=3306,
+        user="root",
+        password="root",
+        database="db_alimentos"
+    )
 
-    assert resultado == "0010"
+def test_conexao_mysql_actions():
+    conn = conectar_mysql_actions()
+    assert conn.is_connected()
+    conn.close()
 
+def test_mostrar_tabela_no_actions():
+    conn = conectar_mysql_actions()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM frutas")
+    resultados = cursor.fetchall()
 
+    print("\n========= CONTEUDO DA TABELA FRUTAS =========")
+    for linha in resultados:
+        print(linha)
+    print("=============================================\n")
 
-'''
-def test_sec_falha_exemplo():
-    """Teste propositalmente errado para demonstrar falha."""
+    cursor.close()
+    conn.close()
 
-    cursor_mock = MagicMock()
-    cursor_mock.fetchone.return_value = (5,)
+    assert len(resultados) > 0
 
-    resultado = obter_proximo_sec(cursor_mock, "A")
+def test_trigger_sec_funcionando():
+    conn = conectar_mysql_actions()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT sec FROM frutas
+        WHERE grupo_id='A' AND fruta='Maçã'
+        ORDER BY id
+    """)
+    macas = [linha[0] for linha in cursor.fetchall()]
+    cursor.close()
+    conn.close()
 
-    # esperado errado de propósito
-    assert resultado == "0005"
-
-'''
-
-
-print("")
+    assert macas == ['0001','0002','0003']
