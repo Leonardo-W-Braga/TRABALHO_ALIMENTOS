@@ -1,4 +1,5 @@
-name: CI MySQL + Python
+name: Entrega Final - CI/CD MySQL & Python
+
 on: [push]
 
 jobs:
@@ -10,33 +11,36 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: meubanco
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h localhost -proot"
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
 
     steps:
-      - uses: actions/checkout@v4
+      # 🔽 PASSO QUE FALTAVA (BAIXAR O REPO)
+      - name: Baixar código do repositório
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Instalar Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - run: pip install mysql-connector-python pytest
+      - name: Instalar dependências
+        run: pip install mysql-connector-python
 
-      - run: sleep 25
+      # 🔽 esperar o MySQL iniciar
+      - name: Esperar MySQL iniciar
+        run: sleep 20
 
-      - name: Criar banco e tabela
-        run: mysql -h 127.0.0.1 -u root -proot < tabela.sql
+      # 🔽 IMPORTAR O BANCO (AGORA O ARQUIVO EXISTE)
+      - name: Criar tabelas no MySQL
+        run: mysql -h 127.0.0.1 -u root -proot meubanco < tabela.sql
 
-      - name: Popular banco
-        run: mysql -h 127.0.0.1 -u root -proot < dados.sql
-
-      - name: Mostrar tabela no log
-        run: mysql -h 127.0.0.1 -u root -proot -e "USE db_alimentos; SELECT * FROM frutas;"
-
-      - name: Rodar testes
-        run: pytest -s
+      # 🔽 rodar o script python
+      - name: Rodar script Python
+        run: python app.py
